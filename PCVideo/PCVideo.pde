@@ -1,8 +1,28 @@
+/*
+PCvideo
+https://github.com/monur/ArduCamMonitor
+modified to match my camera
+
+*/
 import processing.video.*;
 import processing.serial.*;
 
 final int lcdWidth = 84;
 final int lcdHeight = 48;
+
+final int videoWidth = 176; //Must match camera pissibilities
+final int videoHeight = 144; //see available cameras
+final int fps=5;
+ //176/84=2.0952380952380952380952380952381
+ //144/48=3
+final int stepx=2;
+final int stepy=3;
+//must be recalculated 
+
+final int Threshold=80;
+
+color black = color(0);
+color white = color(255);
 
 Capture video;
 Serial myPort;
@@ -10,11 +30,15 @@ int frameStart[] = {0x80, 0x01, 0x80, 0x01};
 int[] lcdPixels = new int[lcdWidth * lcdHeight];
 
 public void setup() {
-  size(lcdWidth, lcdHeight, P2D);
-  video = new Capture(this, lcdWidth, lcdHeight, 15);
-  println(Serial.list());
-  myPort = new Serial(this, Serial.list()[0], 115200);
+  size(lcdWidth, lcdHeight);
+  video = new Capture(this, videoWidth, videoHeight, fps);
+  //println(Serial.list());
+  myPort = new Serial(this, "COM12", 115200);
   loadPixels();
+  //noStroke();
+  //noSmooth();
+    // Start capturing the images from the camera
+  video.start(); 
 }
 
 public void captureEvent(Capture c) {
@@ -23,27 +47,24 @@ public void captureEvent(Capture c) {
 
 void draw() {
   background(0);
-  int pixelWidth = width / video.width;
-  int pixelHeight = height / video.height;
 
-  int index = 0;
-  for (int y = 0; y < video.height; y++) {
+  int indexs = 0;
+  int indexv = 0;
+  for (int y = 0; y < video.height; y=y+stepy) {
     float luminance = 0.0;
-    for (int x = 0; x < video.width; x++) {
-      int pixelColor = video.pixels[index];
-      int r = (pixelColor >> 16) & 0xff;
-      int g = (pixelColor >> 8) & 0xff;
-      int b = pixelColor & 0xff;
-
-      luminance = 0.3*r + 0.59*g + 0.11*b;
-      
-      pixels[index] = video.pixels[index];
-      if(luminance > 80)
-        lcdPixels[index] = 0xffffffff;
-      else
-        lcdPixels[index] = 0x00000000;
-      
-      index++;
+    //int luminance;
+    for (int x = 0; x < video.width-8; x=x+stepx) {
+      indexv=y*videoWidth+x;
+      indexs=y/stepy*lcdWidth+x/stepx;
+      luminance=brightness(video.pixels[indexv]);
+      if(luminance > Threshold){
+        lcdPixels[indexs] = 0xffffffff;
+        pixels[indexs]=black;
+        }
+      else{
+        lcdPixels[indexs] = 0x00000000;
+        pixels[indexs]=white;
+        }
     }
   }
   updatePixels();
