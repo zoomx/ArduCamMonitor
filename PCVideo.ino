@@ -1,3 +1,9 @@
+/*
+PCvideo
+https://github.com/monur/ArduCamMonitor
+
+
+*/
 #define PIN_SCE   7
 #define PIN_RESET 6
 #define PIN_DC    5
@@ -18,6 +24,7 @@ void setup(){
   LcdInitialise();
   delay(500);
   Serial.begin(115200);
+  Serial.println("PCvideo");
 }
 
 void loop(){
