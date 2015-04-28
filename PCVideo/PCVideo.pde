@@ -1,7 +1,12 @@
 /*
 PCvideo
+Original sketch by Onur Avun
 https://github.com/monur/ArduCamMonitor
-modified to match my camera
+modified to match my camera and the new Processing version
+
+
+Works in Processing 2.0.1
+
 
 */
 import processing.video.*;
